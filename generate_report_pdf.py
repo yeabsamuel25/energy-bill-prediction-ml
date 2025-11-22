@@ -1,15 +1,10 @@
 """
-COMPLETE PDF REPORT GENERATOR
-==============================
-Generates comprehensive PDF report with ALL discussions and explanations
-
-FILE LOCATION: C:/Users/yeabs/Desktop/energy_bill_ml_project/generate_complete_report_pdf.py
-
-Author: Yeabsira Samuel
-Course: Supervised Learning - Linear Regression
+COMPLETE PDF REPORT GENERATOR - FIXED VERSION
+==============================================
+Fixes image overlap and distortion issues
 
 REQUIREMENTS:
-    pip install fpdf2
+    pip install fpdf2 Pillow
 
 USAGE:
     python generate_complete_report_pdf.py
@@ -18,12 +13,24 @@ USAGE:
 from fpdf import FPDF
 import os
 from datetime import datetime
+try:
+    from PIL import Image
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
+    print("Warning: Pillow not installed. Install with: pip install Pillow")
 
 
 class ProjectReport(FPDF):
     """Custom PDF class with header and footer"""
     
+    def __init__(self):
+        super().__init__()
+        self.is_title_page = True
+    
     def header(self):
+        if self.is_title_page:
+            return
         self.set_font('Helvetica', 'B', 10)
         self.set_text_color(100, 100, 100)
         self.cell(0, 10, 'Energy Bill Prediction - Linear Regression Project', align='C')
@@ -63,9 +70,12 @@ class ProjectReport(FPDF):
     def bullet_point(self, text):
         self.set_font('Helvetica', '', 10)
         self.set_text_color(0, 0, 0)
-        x_start = self.get_x()
-        self.cell(5, 6, '-')
+        x = self.get_x()
+        y = self.get_y()
+        self.cell(5, 6, chr(149))  # bullet character
+        self.set_xy(x + 5, y)
         self.multi_cell(0, 6, text)
+        self.ln(1)
     
     def code_block(self, text):
         self.set_font('Courier', '', 9)
@@ -78,7 +88,6 @@ class ProjectReport(FPDF):
         if col_widths is None:
             col_widths = [190 // len(headers)] * len(headers)
         
-        # Header
         self.set_font('Helvetica', 'B', 9)
         self.set_fill_color(0, 102, 204)
         self.set_text_color(255, 255, 255)
@@ -86,7 +95,6 @@ class ProjectReport(FPDF):
             self.cell(col_widths[i], 8, header, border=1, fill=True, align='C')
         self.ln()
         
-        # Data rows
         self.set_font('Helvetica', '', 9)
         self.set_text_color(0, 0, 0)
         fill = False
@@ -100,53 +108,134 @@ class ProjectReport(FPDF):
             self.ln()
             fill = not fill
         self.ln(5)
+    
+    def check_page_break(self, height_needed):
+        """Check if we need a page break before adding content"""
+        available = 297 - self.get_y() - 25
+        if height_needed > available:
+            self.add_page()
+            return True
+        return False
+    
+    def add_image_with_caption(self, image_path, caption, max_width=170, max_height=100):
+        """Add image with proper sizing and page break handling"""
+        if not os.path.exists(image_path):
+            self.set_font('Helvetica', 'I', 9)
+            self.set_text_color(200, 0, 0)
+            self.multi_cell(0, 6, f'[Image not found: {image_path}]', align='C')
+            self.ln(5)
+            self.set_text_color(0, 0, 0)
+            return
+        
+        # Get image dimensions
+        if PIL_AVAILABLE:
+            try:
+                with Image.open(image_path) as img:
+                    img_w, img_h = img.size
+            except:
+                img_w, img_h = 800, 600
+        else:
+            img_w, img_h = 800, 600
+        
+        # Calculate display size maintaining aspect ratio
+        aspect = img_h / img_w
+        disp_w = min(max_width, 180)
+        disp_h = disp_w * aspect
+        
+        if disp_h > max_height:
+            disp_h = max_height
+            disp_w = disp_h / aspect
+        
+        # Check for page break
+        self.check_page_break(disp_h + 25)
+        
+        # Center image
+        x_pos = (210 - disp_w) / 2
+        
+        # Add image
+        self.image(image_path, x=x_pos, y=self.get_y(), w=disp_w, h=disp_h)
+        
+        # Move below image
+        self.set_y(self.get_y() + disp_h + 5)
+        
+        # Add caption
+        self.set_font('Helvetica', 'I', 9)
+        self.set_text_color(100, 100, 100)
+        self.multi_cell(0, 5, caption, align='C')
+        self.ln(8)
+        self.set_text_color(0, 0, 0)
 
 
 def generate_report():
-    """Generate the complete PDF report with all discussions"""
+    """Generate the complete PDF report"""
     
     print("="*70)
-    print("GENERATING COMPLETE PDF REPORT")
+    print("GENERATING COMPLETE PDF REPORT (FIXED)")
     print("="*70)
     
-    # Create PDF
     pdf = ProjectReport()
     pdf.alias_nb_pages()
-    pdf.set_auto_page_break(auto=True, margin=20)
+    pdf.set_auto_page_break(auto=True, margin=25)
     
     # ==================== TITLE PAGE ====================
     pdf.add_page()
-    pdf.set_font('Helvetica', 'B', 28)
+    pdf.is_title_page = True
+    
+    pdf.set_font('Helvetica', 'B', 24)
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(30)
+    pdf.cell(0, 15, 'ADDIS ABABA INSTITUTE OF', align='C')
+    pdf.ln()
+    pdf.cell(0, 15, 'TECHNOLOGY', align='C')
+    pdf.ln(20)
+    
+    pdf.set_font('Helvetica', 'B', 20)
+    pdf.cell(0, 12, 'DEPARTMENT OF SOFTWARE', align='C')
+    pdf.ln()
+    pdf.cell(0, 12, 'ENGINEERING', align='C')
+    pdf.ln(25)
+    
+    pdf.set_font('Helvetica', 'B', 18)
     pdf.set_text_color(0, 102, 204)
-    pdf.ln(40)
-    pdf.cell(0, 15, 'Energy Bill Prediction', align='C')
+    pdf.cell(0, 12, 'Machine Learning And Big Data Project', align='C')
+    pdf.ln(20)
+    
+    pdf.set_font('Helvetica', 'B', 16)
+    pdf.set_text_color(0, 0, 0)
+    pdf.cell(0, 10, 'Project Title:', align='C')
     pdf.ln()
-    pdf.cell(0, 15, 'Using Linear Regression', align='C')
+    pdf.set_font('Helvetica', '', 14)
+    pdf.cell(0, 8, 'Estimating Monthly Electricity Costs from', align='C')
     pdf.ln()
+    pdf.cell(0, 8, 'Appliance Usage Hours', align='C')
+    pdf.ln(25)
+    
+    pdf.set_font('Helvetica', 'B', 14)
+    pdf.cell(0, 8, 'Team Members', align='C')
+    pdf.ln(15)
+    
+    pdf.set_font('Helvetica', '', 12)
+    team = [
+        ('1. Kassahun Belachew', 'ATE/8400/14'),
+        ('2. Yeabsira Samuel', 'ATE/9305/14'),
+        ('3. Natnael Nigatu', 'ATE/7495/14'),
+        ('4. Tsegaab Alemu', 'ATE/8814/14')
+    ]
+    for name, id_num in team:
+        pdf.cell(120, 10, name)
+        pdf.cell(0, 10, id_num)
+        pdf.ln(12)
     
     pdf.ln(20)
-    pdf.set_font('Helvetica', '', 14)
+    pdf.set_font('Helvetica', 'I', 10)
     pdf.set_text_color(100, 100, 100)
-    pdf.cell(0, 10, 'Supervised Learning Project Report', align='C')
-    pdf.ln()
-    pdf.cell(0, 10, 'Complete Mathematical & Conceptual Analysis', align='C')
-    pdf.ln()
-    
-    pdf.ln(25)
-    pdf.set_font('Helvetica', 'B', 12)
-    pdf.set_text_color(0, 0, 0)
-    pdf.cell(0, 8, 'Author: Yeabsira Samuel', align='C')
-    pdf.ln()
-    pdf.cell(0, 8, 'Course: Supervised Learning - Linear Regression', align='C')
-    pdf.ln()
-    pdf.cell(0, 8, 'Currency: Ethiopian Birr (ETB)', align='C')
-    pdf.ln()
     pdf.cell(0, 8, f'Date: {datetime.now().strftime("%B %Y")}', align='C')
     
     print("   [+] Title page created")
     
     # ==================== EXECUTIVE SUMMARY ====================
     pdf.add_page()
+    pdf.is_title_page = False
     pdf.chapter_title('Executive Summary')
     
     pdf.body_text(
@@ -402,9 +491,7 @@ def generate_report():
         ],
         [50, 45, 45, 50]
     )
-    pdf.body_text(
-        'Adding house_size_sqm, num_occupants, and season improved accuracy by 75%!'
-    )
+    pdf.body_text('Adding house_size_sqm, num_occupants, and season improved accuracy by 75%!')
     
     print("   [+] Feature scaling section created")
     
@@ -422,9 +509,7 @@ def generate_report():
         [50, 60, 80]
     )
     
-    pdf.body_text(
-        'CRITICAL: Test data is NEVER seen during training. This ensures unbiased evaluation.'
-    )
+    pdf.body_text('CRITICAL: Test data is NEVER seen during training. This ensures unbiased evaluation.')
     
     pdf.section_title('7.2 Training Pipeline')
     pdf.bullet_point('Load 10,000 samples from CSV')
@@ -469,14 +554,14 @@ def generate_report():
     )
     
     pdf.section_title('8.2 Understanding R-squared (0.9894)')
-    pdf.bullet_point('R² = 1.0: Perfect prediction (impossible)')
-    pdf.bullet_point('R² = 0.99: Excellent (OUR MODEL!)')
-    pdf.bullet_point('R² = 0.75: Good')
-    pdf.bullet_point('R² = 0.50: Mediocre')
-    pdf.bullet_point('R² = 0.0: Useless (random guessing)')
+    pdf.bullet_point('R-squared = 1.0: Perfect prediction (impossible)')
+    pdf.bullet_point('R-squared = 0.99: Excellent (OUR MODEL!)')
+    pdf.bullet_point('R-squared = 0.75: Good')
+    pdf.bullet_point('R-squared = 0.50: Mediocre')
+    pdf.bullet_point('R-squared = 0.0: Useless (random guessing)')
     
     pdf.body_text(
-        'Our R² = 0.9894 means 98.94% of bill variation is explained by our 9 features. '
+        'Our R-squared = 0.9894 means 98.94% of bill variation is explained by our 9 features. '
         'Only 1.06% is unexplained random noise.'
     )
     
@@ -491,7 +576,7 @@ def generate_report():
         ['Metric', 'Goal', 'Achieved', 'Status'],
         [
             ['MAE', '40-50 ETB', '22.87 ETB', 'EXCEEDED 75%'],
-            ['R²', '> 0.7', '0.9894', 'EXCEEDED 41%'],
+            ['R-squared', '> 0.7', '0.9894', 'EXCEEDED 41%'],
             ['Time', '< 5 min', '< 1 sec', 'Much faster']
         ],
         [45, 45, 45, 55]
@@ -596,7 +681,7 @@ def generate_report():
         'AC alone contributes 624 ETB (23% of total)!'
     )
     
-    print("   [+] Prediction examples section created")
+    print("   [+] Prediction examples created")
     
     # ==================== LIMITATIONS ====================
     pdf.add_page()
@@ -616,7 +701,7 @@ def generate_report():
     pdf.section_title('11.2 Why Extrapolation Can Work')
     pdf.bullet_point('Physics: Bigger house = proportionally more appliances')
     pdf.bullet_point('Math: Linear equation extends infinitely')
-    pdf.bullet_point('Strong fit (R² = 0.9894) suggests linearity holds')
+    pdf.bullet_point('Strong fit (R-squared = 0.9894) suggests linearity holds')
     
     pdf.section_title('11.3 Why Extrapolation Can Fail')
     pdf.bullet_point('Very large houses may have economies of scale')
@@ -652,49 +737,94 @@ def generate_report():
     
     print("   [+] Limitations section created")
     
-    # ==================== VISUALIZATIONS ====================
+    # ==================== VISUALIZATIONS (FIXED) ====================
     pdf.add_page()
     pdf.chapter_title('12. Visualizations')
     
-    pdf.section_title('12.1 Created Visualizations')
+    pdf.section_title('12.1 Overview')
     pdf.body_text('Seven professional visualizations explain model behavior:')
+    pdf.bullet_point('Correlation Heatmap - Feature relationships')
+    pdf.bullet_point('Feature Importance - Coefficient magnitudes')
+    pdf.bullet_point('Actual vs Predicted - Model accuracy')
+    pdf.bullet_point('Residual Plot - Error analysis')
+    pdf.bullet_point('Distribution Plots - Prediction vs actual')
+    pdf.bullet_point('Feature Relationships - Scatter plots')
+    pdf.bullet_point('Performance Metrics - Summary dashboard')
     
-    pdf.body_text('1. Correlation Heatmap:')
-    pdf.bullet_point('Shows relationships between all features')
-    pdf.bullet_point('AC has strongest correlation (0.845) with bill')
+    # Each visualization on its own page
+    pdf.add_page()
+    pdf.section_title('12.2 Correlation Heatmap')
+    pdf.body_text('Shows relationships between all features and target variable:')
+    pdf.add_image_with_caption(
+        'visualizations/1_correlation_heatmap.png',
+        'Figure 1: Correlation Heatmap - AC shows strongest correlation (0.845) with bill amount',
+        max_width=160, max_height=110
+    )
     
-    pdf.body_text('2. Feature Importance Chart:')
-    pdf.bullet_point('Bar chart ranking features by coefficient magnitude')
-    pdf.bullet_point('AC dominates at 182.07, fridge lowest at 0.32')
+    pdf.add_page()
+    pdf.section_title('12.3 Feature Importance')
+    pdf.body_text('Bar chart ranking features by coefficient magnitude:')
+    pdf.add_image_with_caption(
+        'visualizations/2_feature_importance.png',
+        'Figure 2: Feature Importance - AC dominates at 182.07, fridge lowest at 0.32',
+        max_width=160, max_height=100
+    )
     
-    pdf.body_text('3. Actual vs Predicted Plot:')
-    pdf.bullet_point('Scatter plot showing R² = 0.9894')
-    pdf.bullet_point('Points cluster tightly on diagonal line')
-    pdf.bullet_point('Tests 2,000 samples (20% holdout set)')
+    pdf.add_page()
+    pdf.section_title('12.4 Actual vs Predicted')
+    pdf.body_text('Scatter plot showing model accuracy (R-squared = 0.9894):')
+    pdf.add_image_with_caption(
+        'visualizations/3_actual_vs_predicted.png',
+        'Figure 3: Actual vs Predicted - Points cluster tightly on diagonal line (R-squared = 0.9894)',
+        max_width=150, max_height=110
+    )
     
-    pdf.body_text('4. Residual Plot:')
-    pdf.bullet_point('Shows prediction errors distributed randomly around zero')
-    pdf.bullet_point('No systematic bias (confirms model validity)')
+    pdf.add_page()
+    pdf.section_title('12.5 Residual Analysis')
+    pdf.body_text('Shows prediction errors distributed randomly around zero:')
+    pdf.add_image_with_caption(
+        'visualizations/4_residual_plot.png',
+        'Figure 4: Residual Plot - No systematic bias (errors randomly distributed)',
+        max_width=160, max_height=100
+    )
     
-    pdf.body_text('5. Distribution Plots:')
-    pdf.bullet_point('Compares actual vs predicted bill distributions')
-    pdf.bullet_point('Similar shapes confirm model learned patterns correctly')
+    pdf.add_page()
+    pdf.section_title('12.6 Distribution Comparison')
+    pdf.body_text('Compares actual vs predicted bill distributions:')
+    pdf.add_image_with_caption(
+        'visualizations/5_distributions.png',
+        'Figure 5: Distribution Plots - Similar shapes confirm model learned patterns correctly',
+        max_width=170, max_height=95
+    )
     
-    pdf.body_text('6. Feature Relationships:')
-    pdf.bullet_point('Six scatter plots showing linear trends')
-    pdf.bullet_point('AC vs Bill shows strongest upward slope')
+    pdf.add_page()
+    pdf.section_title('12.7 Feature Relationships')
+    pdf.body_text('Six scatter plots showing linear trends with bill:')
+    pdf.add_image_with_caption(
+        'visualizations/6_feature_relationships.png',
+        'Figure 6: Feature Relationships - AC vs Bill shows strongest upward slope',
+        max_width=170, max_height=115
+    )
     
-    pdf.body_text('7. Performance Metrics Dashboard:')
-    pdf.bullet_point('Visual summary of R², RMSE, MAE values')
-    pdf.bullet_point('Comparison to baseline model')
+    pdf.add_page()
+    pdf.section_title('12.8 Performance Metrics Dashboard')
+    pdf.body_text('Visual summary of model evaluation metrics:')
+    pdf.add_image_with_caption(
+        'visualizations/7_performance_metrics.png',
+        'Figure 7: Performance Metrics - Comprehensive evaluation showing R-squared, RMSE, MAE values',
+        max_width=160, max_height=100
+    )
     
-    pdf.section_title('12.2 Key Insights')
-    pdf.bullet_point('Actual vs Predicted: Tight clustering confirms high R²')
+    pdf.section_title('12.9 Key Insights from Visualizations')
+    pdf.bullet_point('Correlation Heatmap: AC has strongest correlation (0.845) with bill')
+    pdf.bullet_point('Feature Importance: AC dominates (182.07), fridge negligible (0.32)')
+    pdf.bullet_point('Actual vs Predicted: Tight clustering confirms high R-squared (0.9894)')
     pdf.bullet_point('Residual Plot: Random distribution = no systematic errors')
-    pdf.bullet_point('Feature Importance: Clear ranking helps identify cost drivers')
-    pdf.bullet_point('Correlation Heatmap: Validates feature selection')
+    pdf.bullet_point('Distribution Plots: Similar shapes = model learned patterns correctly')
+    pdf.bullet_point('Feature Relationships: Clear linear trends validate model assumptions')
+    pdf.bullet_point('Performance Metrics: All metrics confirm excellent model performance')
     
-    print("   [+] Visualizations section created")
+    print("   [+] Visualizations section created (FIXED)")
     
     # ==================== PRACTICAL APPLICATIONS ====================
     pdf.add_page()
@@ -735,7 +865,7 @@ def generate_report():
     pdf.bullet_point('Identify anomalies (possible inefficiencies)')
     pdf.bullet_point('Prioritize improvements')
     
-    print("   [+] Practical applications section created")
+    print("   [+] Practical applications created")
     
     # ==================== DISCUSSION ====================
     pdf.add_page()
@@ -752,7 +882,7 @@ def generate_report():
     pdf.bullet_point('Linear assumption may not hold for extreme values')
     pdf.bullet_point('Synthetic data (not real household measurements)')
     pdf.bullet_point('Training range limited to 50-200 sqm houses')
-    pdf.bullet_point('Doesnt account for seasonal rate changes')
+    pdf.bullet_point('Does not account for seasonal rate changes')
     pdf.bullet_point('Missing factors: appliance efficiency, insulation quality')
     
     pdf.section_title('14.3 Lessons Learned')
@@ -788,6 +918,14 @@ def generate_report():
         '|-- src/\n'
         '|   |-- train.py\n'
         '|   |-- predict.py\n'
+        '|-- visualizations/\n'
+        '|   |-- 1_correlation_heatmap.png\n'
+        '|   |-- 2_feature_importance.png\n'
+        '|   |-- 3_actual_vs_predicted.png\n'
+        '|   |-- 4_residual_plot.png\n'
+        '|   |-- 5_distributions.png\n'
+        '|   |-- 6_feature_relationships.png\n'
+        '|   |-- 7_performance_metrics.png\n'
         '|-- requirements.txt\n'
         '|-- README.md'
     )
@@ -841,7 +979,7 @@ def generate_report():
     pdf.bullet_point('Warn when inputs outside training range (transparency)')
     pdf.bullet_point('No retraining needed (linear equation works for any input)')
     
-    print("   [+] Technical implementation section created")
+    print("   [+] Technical implementation created")
     
     # ==================== CONCLUSION ====================
     pdf.add_page()
@@ -854,9 +992,7 @@ def generate_report():
         'of 40-50 ETB accuracy.'
     )
     
-    pdf.body_text(
-        'Key achievements include:'
-    )
+    pdf.body_text('Key achievements include:')
     pdf.bullet_point('75% improvement over basic 6-feature model by adding house characteristics')
     pdf.bullet_point('Complete understanding of mathematical foundations (gradient descent, cost functions)')
     pdf.bullet_point('Identification of AC as dominant cost driver (coefficient: 182.07)')
@@ -889,7 +1025,7 @@ def generate_report():
         [70, 120]
     )
     
-    print("   [+] Conclusion section created")
+    print("   [+] Conclusion created")
     
     # ==================== REFERENCES ====================
     pdf.add_page()
@@ -910,7 +1046,7 @@ def generate_report():
     pdf.bullet_point('Energy Consumption Patterns in East Africa')
     pdf.bullet_point('Appliance Power Consumption Standards (IEC 62301)')
     
-    print("   [+] References section created")
+    print("   [+] References created")
     
     # ==================== APPENDIX ====================
     pdf.add_page()
@@ -965,6 +1101,7 @@ def generate_report():
         [40, 40, 110]
     )
     
+    pdf.add_page()
     pdf.section_title('D. Prediction Reliability Guidelines')
     pdf.body_text('Input Range Recommendations:')
     pdf.bullet_point('house_size: 50-300 sqm (reliable), 300-500 (medium), >500 (extrapolation)')
@@ -983,7 +1120,7 @@ def generate_report():
     pdf.body_text('Issue 3: Training takes too long')
     pdf.bullet_point('Solution: Feature scaling should resolve this (< 1 second expected)')
     
-    print("   [+] Appendix section created")
+    print("   [+] Appendix created")
     
     # ==================== ACKNOWLEDGMENTS ====================
     pdf.add_page()
@@ -1004,8 +1141,6 @@ def generate_report():
         'problem relevant to Ethiopian households, combining mathematical rigor with practical '
         'utility.'
     )
-    
-    print("   [+] Acknowledgments section created")
     
     # ==================== AUTHOR STATEMENT ====================
     pdf.ln(20)
@@ -1028,7 +1163,7 @@ def generate_report():
     pdf.set_font('Helvetica', '', 10)
     pdf.cell(0, 8, f'Date: {datetime.now().strftime("%B %d, %Y")}', align='C')
     
-    print("   [+] Author statement created")
+    print("   [+] Acknowledgments created")
     
     # ==================== SAVE PDF ====================
     output_file = 'Energy_Bill_Prediction_Complete_Report.pdf'
@@ -1043,6 +1178,7 @@ def generate_report():
     print(f"  Sections: 19 chapters")
     print(f"  Tables: 25+")
     print(f"  Code Examples: 15+")
+    print(f"  Visualizations: 7 images")
     print("\n" + "="*70)
     print("REPORT CONTENTS:")
     print("="*70)
@@ -1057,8 +1193,8 @@ def generate_report():
     print("  9. Results and Evaluation")
     print(" 10. Feature Importance Analysis")
     print(" 11. Prediction Examples (with calculations)")
-    print(" 12. Model Limitations & Extrapolation")
-    print(" 13. Visualizations (7 plots explained)")
+    print(" 12. Visualizations (7 plots - FIXED)")
+    print(" 13. Model Limitations & Extrapolation")
     print(" 14. Practical Applications")
     print(" 15. Discussion (strengths/weaknesses)")
     print(" 16. Technical Implementation")
@@ -1067,7 +1203,7 @@ def generate_report():
     print(" 19. Appendix (derivations, statistics)")
     print(" 20. Acknowledgments")
     print("="*70)
-    print("\nYou're ready to present! 🎉")
+    print("\nYou're ready to present!")
     print("="*70)
 
 

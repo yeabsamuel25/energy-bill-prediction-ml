@@ -1,17 +1,4 @@
-"""
-Data Loader Module
-==================
-Loads and explores electricity bill data for Linear Regression
 
-Author: Yeabsira Samuel
-Course: Supervised Learning - Linear Regression
-Currency: Ethiopian Birr (ETB)
-
-Functions:
-----------
-- load_data(): Load dataset and split into train/test
-- explore_data(): Exploratory Data Analysis (EDA)
-"""
 
 import pandas as pd
 import numpy as np

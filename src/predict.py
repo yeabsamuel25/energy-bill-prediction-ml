@@ -1,18 +1,3 @@
-"""
-PREDICTION SCRIPT
-=================
-Interactive electricity bill prediction using trained Linear Regression model
-
-Author: Yeabsira Samuel
-Course: Supervised Learning - Linear Regression
-Currency: Ethiopian Birr (ETB)
-
-This script:
-1. Loads trained model
-2. Gets user input for appliance usage
-3. Makes prediction
-4. Shows detailed breakdown
-"""
 
 import os
 import sys

@@ -1,17 +1,3 @@
-"""
-Energy Bill Predictor Package
-==============================
-Linear Regression based energy bill prediction system
-
-Author: Yeabsira Samuel
-Course: Supervised Learning - Linear Regression
-Currency: Ethiopian Birr (ETB)
-
-This package provides:
-- Data loading and exploration
-- Linear Regression model training with Gradient Descent
-- Bill prediction from appliance usage
-"""
 
 __version__ = "3.0.0"
 __author__ = "Yeabsira Samuel"

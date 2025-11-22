@@ -1,18 +1,3 @@
-"""
-TRAINING SCRIPT
-===============
-Trains Linear Regression model on electricity bill data
-
-Author: Yeabsira Samuel
-Course: Supervised Learning - Linear Regression
-Currency: Ethiopian Birr (ETB)
-
-This script:
-1. Loads and explores data
-2. Trains Linear Regression model
-3. Evaluates performance
-4. Saves trained model
-"""
 
 import os
 import sys
