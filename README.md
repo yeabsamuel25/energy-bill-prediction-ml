@@ -1,21 +1,52 @@
-ADDIS ABABA INSTITUTE OF TECHNOLOGY 
+# Energy Bill Prediction - Machine Learning Project
 
-DEPARTMENT OF SOFTWARE ENGINEERING
- Machine Learning And Big Data Project
- Project Title- Estimating Monthly Electricity Costs from
-Appliance Usage Hours
+## ADDIS ABABA INSTITUTE OF TECHNOLOGY
+### Department of Software Engineering
 
- Name ID
-1.Kassahun Belachew_________________________ ATE/8400/14
-2.Yeabsira Samuel____________________________ ATE/9305/14
-3.Natnael Nigatu_____________________________ ATE/7495/14
-4.Tsegaab Alemu_____________________________ ATE/8814/14
+---
 
+## Project Title
+**Estimating Monthly Electricity Costs from Appliance Usage Hours**
 
- Submission date: 11/22/2025
- Submitted to: Mr. Bisrat
+---
 
+## Team Members
 
+| Name | ID |
+|------|-----|
+| 1. Kassahun Belachew | ATE/8400/14 |
+| 2. Yeabsira Samuel | ATE/9305/14 |
+| 3. Natnael Nigatu | ATE/7495/14 |
+| 4. Tsegaab Alemu | ATE/8814/14 |
+
+---
+
+## Submission Details
+- **Date:** November 22, 2025
+- **Submitted to:** Mr. Bisrat
+
+---
+
+## Project Overview
+This project implements a Linear Regression model to predict monthly electricity bills for Ethiopian households based on appliance usage patterns.
+
+## Key Results
+- **R² Score:** 0.9894 (98.94% variance explained)
+- **MAE:** 22.87 ETB
+- **RMSE:** 28.68 ETB
+
+## Features Used
+- House size (sqm)
+- Number of occupants
+- Season (hot/cool)
+- AC, Fridge, Lights, Fans, Washing Machine, TV usage hours
+
+## How to Run
+```bash
+pip install -r requirements.txt
+python src/train.py
+python src/predict.py
+```
 
 
 # ⚡ Energy Bill Predictor - Ethiopia
@@ -516,7 +547,6 @@ The training script (`train.py`) automatically generates 7 professional visualiz
 
 ---
 
-<<<<<<< HEAD
 =======
 ## 🎯 Model Limitations & Extrapolation
 
@@ -541,9 +571,6 @@ The prediction system displays warnings when inputs are outside training range:
 
 The model will extrapolate, which may be less accurate.
 ```
-
-
->>>>>>> 95e11ac (Fixed PDF report - resolved image overlap issues)
 
 ## 🚨 Common Issues & Solutions
 
@@ -611,58 +638,6 @@ After completing this project, you have demonstrated understanding of:
 - Transparent communication of limitations
 
 ---
-
-<<<<<<< HEAD
-
-1. **Data Generation**
-   ```bash
-   python data/create_improved_data.py
-   ```
-   Explain the 9 features and why you chose them
-
-2. **Training Process**
-   ```bash
-   python src/train.py
-   ```
-   - Show EDA output
-   - Explain gradient descent steps
-   - Discuss R² = 0.87 result
-
-3. **Live Prediction**
-   ```bash
-   python src/predict.py
-   ```
-   - Input realistic values
-   - Show prediction and breakdown
-   - Discuss energy-saving tips
-
-4. **Code Walkthrough**
-   - Open `src/model.py`
-   - Explain LinearRegressionModel class
-   - Show gradient descent theory comments
-
-### Key Points to Emphasize
-
-✅ "I used 9 features instead of 6 to capture more variation"  
-✅ "Feature scaling is crucial for gradient descent convergence"  
-✅ "R² = 0.87 means the model explains 87% of bill variance"  
-✅ "MAE = 45 ETB is much better than baseline = 150 ETB"  
-✅ "All values in Ethiopian Birr (ETB), not foreign currency"
-
----
-
-## 📧 Contact
-
-**Author**: Yeabsira Samuel  
-**Project**: Supervised Learning - Linear Regression  
-**Date**: 2024
-
----
-
-## 📄 License
-
-This project is for educational purposes as part of a Supervised Learning course.
-=======
 
 This project is for educational purposes as part of a Supervised Learning course.
 
