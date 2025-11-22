@@ -1,0 +1,28 @@
+# ============================================================================
+# Energy Bill Predictor - Python Dependencies
+# ============================================================================
+# Project: Supervised Learning - Linear Regression
+# Author: Yeabsira Samuel
+# Currency: Ethiopian Birr (ETB)
+# ============================================================================
+
+# Core Machine Learning
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+
+# Optional: For visualization (if you want to create charts)
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# ============================================================================
+# Installation Instructions
+# ============================================================================
+# 
+# To install all dependencies, run:
+#   pip install -r requirements.txt
+#
+# Or install individually:
+#   pip install numpy pandas scikit-learn matplotlib seaborn
+#
+# ============================================================================
