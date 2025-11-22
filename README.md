@@ -402,7 +402,3 @@ After completing this project, you understand:
 ## 📄 License
 
 This project is for educational purposes as part of a Supervised Learning course.
-
----
-
-**🎯 Good luck with your presentation! You've got an A+ project!** 🌟
