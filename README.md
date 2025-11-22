@@ -350,9 +350,6 @@ After completing this project, you understand:
 
 ---
 
-## 🎉 Presentation Tips
-
-### What to Show Your Teacher
 
 1. **Data Generation**
    ```bash
